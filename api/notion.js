@@ -39,18 +39,18 @@ export default async function handler(req, res) {
       });
     }
     if (type === "habits") {
-      const data = await queryDB(DBS.habits);
-      return res.status(200).json(
-        data.results.map((p) => ({
-          id: p.id,
-          name: p.properties["項目名稱"]?.title?.[0]?.plain_text || "",
-          difficulty: p.properties["難度評級"]?.select?.name || "E級",
-          exp: p.properties["EXP產出"]?.number || 0,
-          streak: p.properties["連續達成天數"]?.number || 0,
-          done: p.properties["當日狀態"]?.checkbox || false,
-        }))
-      );
-    }
+  const data = await queryDB(DBS.habits);
+  return res.status(200).json(
+    data.results.map((p) => ({
+      id: p.id,
+      name: p.properties["訓練/修復項目"]?.title?.[0]?.plain_text || "",
+      difficulty: p.properties["難度評級"]?.select?.name || "E級：微習慣",
+      exp: 10,
+      streak: p.properties["連續達成天數_Streak"]?.number || 0,
+      done: p.properties["當日狀態"]?.checkbox || false,
+    }))
+  );
+}
     if (type === "quests") {
       const data = await queryDB(DBS.quests);
       return res.status(200).json(
