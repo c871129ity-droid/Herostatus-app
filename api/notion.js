@@ -1,5 +1,6 @@
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
+
   const NOTION_TOKEN = process.env.NOTION_TOKEN;
   const DBS = {
     hero: process.env.HERO_DB,
@@ -7,7 +8,10 @@ export default async function handler(req, res) {
     quests: process.env.QUESTS_DB,
     accounts: process.env.ACCOUNTS_DB,
   };
-  const type = req.query?.type;
+
+  // 修正：用多種方式讀取 type 參數
+  const urlObj = new URL(req.url, `https://${req.headers.host}`);
+  const type = urlObj.searchParams.get("type") || req.query?.type || "";
 
   async function queryDB(dbId) {
     const r = await fetch(`https://api.notion.com/v1/databases/${dbId}/query`, {
@@ -19,7 +23,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({}),
     });
-    if (!r.ok) throw new Error(`Notion API error: ${r.status} for DB ${dbId}`);
+    if (!r.ok) throw new Error(`Notion API error: ${r.status}`);
     return r.json();
   }
 
@@ -64,7 +68,7 @@ export default async function handler(req, res) {
         balance: p.properties["初始金額"]?.number || 0,
       })));
     }
-    return res.status(400).json({ error: "Unknown type" });
+    return res.status(400).json({ error: "Unknown type", receivedType: type, url: req.url });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
